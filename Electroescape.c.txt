@@ -1,0 +1,69 @@
+#include <SoftwareSerial.h>
+SoftwareSerial BT(3,2);
+int start=0,count=0;
+void setup() {
+// put your setup code here, to run once:
+              BT.begin(9600);
+              Serial.begin(9600);
+              pinMode(10,INPUT);pinMode(11,OUTPUT);
+            }
+            String data;
+void checkstart()
+{
+  if(!digitalRead(3))
+  {start=1;}
+  else 
+  {start=0;}
+};
+void loop() {
+// put your main code here, to run repeatedly:
+int flex= analogRead(A0);
+data= String(flex)+','+'B';
+BT.println(data);
+Serial.println(flex);
+checkstart();
+if(start==1)
+{
+    if(flex>120)
+    {
+      count= count+1;
+    }
+    else
+      {
+        count=0;
+      }
+    if(count>10)
+    {
+      digitalWrite(11,HIGH);count=0;
+      data= String(flex)+','+'A';
+      BT.println(data);
+      delay(2000);
+      while(1)
+      {
+        int flex= analogRead(A0);
+        checkstart();
+        if(flex<120 || start==0)
+        {
+          count=count+1;
+          if(count>20)
+          {
+            count=0;
+            digitalWrite(11,LOW);
+            break;
+          }
+        }
+        
+        Serial.println(flex);
+        data= String(flex)+','+'B';
+        BT.println(data);delay(100);
+      }
+      
+    }
+    delay(100);
+  }
+  else
+  {
+    digitalWrite(11,LOW);
+  }
+  delay(100);
+}
